@@ -43,6 +43,8 @@ const GameCanvas: React.FC<Props> = ({ status, level, onGameOver, onScoreUpdate,
   const lastShotTime = useRef(0);
   const enemyMoveDir = useRef(1);
   const enemyGridOffset = useRef(0);
+  const prevStatusRef = useRef<GameStatus>(status);
+  const prevStatusRef = useRef<GameStatus>(status);
 
   // Initialize stars
   useEffect(() => {
@@ -119,12 +121,30 @@ const GameCanvas: React.FC<Props> = ({ status, level, onGameOver, onScoreUpdate,
   }, []);
 
   useEffect(() => {
-    if (status === GameStatus.PLAYING && enemiesRef.current.length === 0) {
-      initEnemies(level);
+    // 新開一局（從 START 或 GAMEOVER → PLAYING）時，完整重置狀態與分數
+    if (
+      status === GameStatus.PLAYING &&
+      (prevStatusRef.current === GameStatus.START || prevStatusRef.current === GameStatus.GAMEOVER)
+    ) {
       scoreRef.current = 0;
-      playerRef.current.lives = 3;
+      playerRef.current = {
+        ...playerRef.current,
+        x: CANVAS_WIDTH / 2 - PLAYER_SIZE / 2,
+        y: CANVAS_HEIGHT - 80,
+        lives: 3
+      };
+
+      bulletsRef.current = [];
+      enemiesRef.current = [];
+      particlesRef.current = [];
+      enemyGridOffset.current = 0;
+      enemyMoveDir.current = 1;
+
+      initEnemies(level);
       onScoreUpdate(0);
     }
+
+    prevStatusRef.current = status;
   }, [status, level, initEnemies, onScoreUpdate]);
 
   useEffect(() => {
