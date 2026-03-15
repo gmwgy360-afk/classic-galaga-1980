@@ -51,7 +51,6 @@ export interface GameState {
   status: GameStatus;
   score: number;
   level: number;
-  highScore: number;
   waveName: string;
   battleQuote: string;
 }

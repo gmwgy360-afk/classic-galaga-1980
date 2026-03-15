@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import GameCanvas from './components/GameCanvas';
 import { GameStatus, GameState } from './types';
 import { getLevelFlavor } from './services/geminiService';
-import { Trophy, Play, RefreshCw, Zap, ArrowLeft, ArrowRight, Target } from 'lucide-react';
+import { Play, RefreshCw, Zap, ArrowLeft, ArrowRight, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const App: React.FC = () => {
@@ -11,7 +11,6 @@ const App: React.FC = () => {
     status: GameStatus.START,
     score: 0,
     level: 1,
-    highScore: parseInt(localStorage.getItem('highScore') || '0'),
     waveName: '啟動準備中...',
     battleQuote: '按下 START 開始戰鬥'
   });
@@ -47,13 +46,10 @@ const App: React.FC = () => {
   };
 
   const onGameOver = (finalScore: number) => {
-    const newHighScore = Math.max(finalScore, gameState.highScore);
-    localStorage.setItem('highScore', newHighScore.toString());
     setGameState(prev => ({
       ...prev,
       status: GameStatus.GAMEOVER,
-      score: finalScore,
-      highScore: newHighScore
+      score: finalScore
     }));
   };
 
@@ -115,18 +111,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="space-y-1 text-right"
-        >
-          <div className="text-purple-400 text-[10px] md:text-xs tracking-[0.2em] font-bold flex items-center justify-end gap-1 md:gap-2">
-            BEST <Trophy size={14} className="text-yellow-400 fill-yellow-400" />
-          </div>
-          <div className="text-2xl md:text-4xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-            {gameState.highScore.toLocaleString()}
-          </div>
-        </motion.div>
+        {/* 右側原本 BEST 區塊移除，不再顯示歷史最高分 */}
       </div>
 
       {/* Game Canvas Container */}
