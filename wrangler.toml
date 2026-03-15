@@ -1,0 +1,10 @@
+name = "classic-galaga-1980"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "./dist"
+# 部署時需指定帳號：在終端機 export CLOUDFLARE_ACCOUNT_ID="你的Account_ID" 可避免 /memberships 錯誤
+
+[vars]
+  # 部署到 Cloudflare 後，請在 Cloudflare 專案設定裡面，將 GEMINI_API_KEY 設為環境變數
+  # 這裡只是宣告名稱，實際值不要寫在檔案內
+  GEMINI_API_KEY = ""
+

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>小蜜蜂 - 經典電玩（霓虹版）</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        font-family: "Press Start 2P", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top, #1f2937 0, #020617 40%, #000 100%),
+          radial-gradient(circle at bottom, #0f172a 0, #000 55%);
+        color: #e5e7eb;
+      }
+
+      .arcade-shell {
+        width: 100%;
+        max-width: 480px;
+        background: rgba(0, 0, 0, 0.88);
+        border-radius: 24px;
+        border: 2px solid rgba(148, 163, 184, 0.45);
+        box-shadow:
+          0 0 40px rgba(56, 189, 248, 0.4),
+          0 0 80px rgba(37, 99, 235, 0.3);
+        padding: 20px 18px 14px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .arcade-shell::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(34, 211, 238, 0.08), transparent 50%),
+          radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.08), transparent 50%);
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      .arcade-inner {
+        position: relative;
+        z-index: 1;
+      }
+
+      .arcade-title {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .arcade-title-main {
+        font-size: 26px;
+        line-height: 1;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, #22d3ee, #2563eb);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow:
+          0 0 12px rgba(34, 211, 238, 0.9),
+          0 0 28px rgba(37, 99, 235, 0.8);
+        margin-bottom: 4px;
+      }
+
+      .arcade-title-sub {
+        font-size: 9px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: #facc15;
+        text-shadow:
+          0 0 10px rgba(250, 204, 21, 0.9),
+          0 0 20px rgba(250, 250, 46, 0.4);
+      }
+
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin: 16px 0 14px;
+        gap: 8px;
+      }
+
+      .hud-block {
+        flex: 1;
+      }
+
+      .hud-block.center {
+        text-align: center;
+      }
+
+      .hud-block.right {
+        text-align: right;
+      }
+
+      .hud-label {
+        font-size: 9px;
+        letter-spacing: 0.25em;
+        color: #38bdf8;
+        opacity: 0.85;
+      }
+
+      .hud-value {
+        margin-top: 4px;
+        font-size: 18px;
+        color: #f9fafb;
+        text-shadow: 0 0 10px rgba(248, 250, 252, 0.4);
+      }
+
+      .hud-sub {
+        margin-top: 4px;
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        color: #9ca3af;
+      }
+
+      .game-frame {
+        border-radius: 18px;
+        border: 2px solid rgba(148, 163, 184, 0.35);
+        background: radial-gradient(circle at top, #020617 0, #020617 45%, #000 100%);
+        box-shadow:
+          0 0 40px rgba(15, 23, 42, 0.8),
+          inset 0 0 24px rgba(15, 23, 42, 0.9);
+        padding: 8px;
+        aspect-ratio: 3 / 4;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .game-inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-size: 10px;
+        line-height: 1.8;
+        text-align: center;
+        color: #e5e7eb;
+      }
+
+      #game-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #020617;
+      }
+
+      #game-overlay {
+        pointer-events: auto;
+      }
+
+      #game-overlay.hidden {
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .game-inner h2 {
+        font-size: 12px;
+        margin-bottom: 8px;
+        letter-spacing: 0.16em;
+      }
+
+      .game-inner p {
+        margin: 4px 0;
+      }
+
+      .controls {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .controls-left {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 999px;
+        border: 2px solid rgba(148, 163, 184, 0.7);
+        background: radial-gradient(circle at 30% 30%, #1f2937, #020617);
+        color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow:
+          0 0 16px rgba(148, 163, 184, 0.6),
+          inset 0 0 10px rgba(15, 23, 42, 0.9);
+        transition:
+          transform 0.1s ease-out,
+          box-shadow 0.1s ease-out,
+          background 0.15s ease-out;
+      }
+
+      .btn-circle:active {
+        transform: scale(0.94);
+        box-shadow:
+          0 0 6px rgba(148, 163, 184, 0.8),
+          inset 0 0 16px rgba(15, 23, 42, 1);
+        background: radial-gradient(circle at 30% 30%, #0f172a, #020617);
+      }
+
+      /* 手機觸控：減少延遲、避免雙擊縮放 */
+      .controls button {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .btn-fire {
+        width: 76px;
+        height: 76px;
+        border-radius: 999px;
+        border: 3px solid rgba(248, 113, 113, 0.9);
+        background: radial-gradient(circle at 30% 30%, #b91c1c, #450a0a);
+        color: #fee2e2;
+        font-size: 24px;
+        box-shadow:
+          0 0 24px rgba(248, 113, 113, 0.9),
+          inset 0 0 14px rgba(127, 29, 29, 1);
+      }
+
+      .btn-fire:active {
+        transform: scale(0.96);
+        box-shadow:
+          0 0 12px rgba(248, 113, 113, 1),
+          inset 0 0 20px rgba(127, 29, 29, 1);
+      }
+
+      .controls-hints {
+        margin-top: 10px;
+        font-size: 8px;
+        letter-spacing: 0.2em;
+        text-align: center;
+        color: #6b7280;
+      }
+
+      .footer {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 8px;
+        letter-spacing: 0.3em;
+        color: #4b5563;
+        text-transform: uppercase;
+      }
+
+      @media (min-width: 768px) {
+        .arcade-shell {
+          padding: 22px 22px 16px;
+        }
+
+        .arcade-title-main {
+          font-size: 30px;
+        }
+
+        .hud-value {
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="arcade-shell">
+      <div class="arcade-inner">
+        <header class="arcade-title">
+          <div class="arcade-title-main">GALAXIAN</div>
+          <div class="arcade-title-sub">NEON 1980</div>
+        </header>
+
+        <section class="hud" aria-label="遊戲狀態">
+          <div class="hud-block">
+            <div class="hud-label">SCORE</div>
+            <div class="hud-value" id="score">0</div>
+          </div>
+          <div class="hud-block center">
+            <div class="hud-label">STAGE</div>
+            <div class="hud-value" id="stage">1</div>
+            <div class="hud-sub">小蜜蜂 經典電玩</div>
+          </div>
+          <div class="hud-block right">
+            <div class="hud-label">BEST</div>
+            <div class="hud-value" id="best">0</div>
+          </div>
+        </section>
+
+        <main class="game-frame">
+          <div class="game-inner" id="game-root">
+            <canvas id="game-canvas" width="320" height="400"></canvas>
+            <div id="game-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(2,6,23,0.9);pointer-events:none;">
+              <h2 style="margin:0 0 8px;">🐝 小蜜蜂</h2>
+              <p id="overlay-text" style="margin:0;font-size:10px;">點擊畫面開始</p>
+            </div>
+          </div>
+        </main>
+
+        <section class="controls" aria-label="手機操作按鈕">
+          <div class="controls-left">
+            <button class="btn-circle" id="btn-left">◀</button>
+            <button class="btn-circle" id="btn-right">▶</button>
+          </div>
+          <button class="btn-circle btn-fire" id="btn-fire">●</button>
+        </section>
+
+        <div class="controls-hints">
+          MOBILE: TAP ARROWS &amp; FIRE · DESKTOP: ← → + SPACE
+        </div>
+
+        <footer class="footer">
+          TAIWAN RETRO ARCADE SERIES &copy; 2026
+        </footer>
+      </div>
+    </div>
+
+    <script>
+(function () {
+  var canvas = document.getElementById('game-canvas');
+  var ctx = canvas.getContext('2d');
+  var overlay = document.getElementById('game-overlay');
+  var overlayText = document.getElementById('overlay-text');
+  var elScore = document.getElementById('score');
+  var elStage = document.getElementById('stage');
+  var elBest = document.getElementById('best');
+  var btnLeft = document.getElementById('btn-left');
+  var btnRight = document.getElementById('btn-right');
+  var btnFire = document.getElementById('btn-fire');
+
+  var W = canvas.width;
+  var H = canvas.height;
+  var playerW = 24;
+  var playerH = 16;
+  var bulletSpeed = -8;
+  var enemyRows = 3;
+  var enemyCols = 8;
+  var cell = 20;
+
+  var state = {
+    gameStarted: false,
+    playerX: W / 2 - playerW / 2,
+    playerY: H - 40,
+    bullets: [],
+    enemies: [],
+    score: 0,
+    best: parseInt(localStorage.getItem('xmf-best') || '0', 10),
+    lives: 3,
+    stage: 1,
+    moveLeft: false,
+    moveRight: false,
+    firePressed: false,
+    lastShot: 0,
+    animId: null
+  };
+
+  function spawnEnemies() {
+    state.enemies = [];
+    for (var row = 0; row < enemyRows; row++) {
+      for (var col = 0; col < enemyCols; col++) {
+        state.enemies.push({
+          x: 40 + col * (cell + 4),
+          y: 30 + row * (cell + 4),
+          w: cell,
+          h: cell,
+          alive: true
+        });
+      }
+    }
+  }
+
+  function drawPlayer() {
+    var x = state.playerX;
+    var y = state.playerY;
+    ctx.fillStyle = '#22d3ee';
+    ctx.shadowColor = '#22d3ee';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(x + playerW / 2, y + playerH);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x + playerW / 4, y + playerH);
+    ctx.moveTo(x + playerW / 2, y + playerH);
+    ctx.lineTo(x + playerW, y);
+    ctx.lineTo(x + (playerW * 3) / 4, y + playerH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  function drawBullets() {
+    ctx.fillStyle = '#facc15';
+    state.bullets.forEach(function (b) {
+      ctx.fillRect(b.x, b.y, 4, 10);
+    });
+  }
+
+  function drawEnemies() {
+    state.enemies.forEach(function (e) {
+    if (!e.alive) return;
+      ctx.fillStyle = '#f87171';
+      ctx.fillRect(e.x, e.y, e.w, e.h);
+    });
+  }
+
+  function tick() {
+    if (!state.gameStarted) return;
+
+    var dx = 5;
+    if (state.moveLeft) state.playerX = Math.max(0, state.playerX - dx);
+    if (state.moveRight) state.playerX = Math.min(W - playerW, state.playerX + dx);
+
+    if (state.firePressed && Date.now() - state.lastShot > 200) {
+      state.bullets.push({
+        x: state.playerX + playerW / 2 - 2,
+        y: state.playerY,
+        w: 4,
+        h: 10
+      });
+      state.lastShot = Date.now();
+    }
+
+    state.bullets.forEach(function (b) {
+      b.y += bulletSpeed;
+    });
+    state.bullets = state.bullets.filter(function (b) { return b.y > -20; });
+
+    state.bullets.forEach(function (b) {
+      state.enemies.forEach(function (e) {
+        if (!e.alive) return;
+        if (b.x < e.x + e.w && b.x + b.w > e.x && b.y < e.y + e.h && b.y + b.h > e.y) {
+          e.alive = false;
+          b.y = -99;
+          state.score += 10;
+        }
+      });
+    });
+
+    var aliveCount = state.enemies.filter(function (e) { return e.alive; }).length;
+    if (aliveCount === 0) {
+      state.stage++;
+      spawnEnemies();
+    }
+
+    if (state.score > state.best) {
+      state.best = state.score;
+      localStorage.setItem('xmf-best', String(state.best));
+    }
+
+    elScore.textContent = state.score;
+    elStage.textContent = state.stage;
+    elBest.textContent = state.best;
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, W, H);
+    drawEnemies();
+    drawBullets();
+    drawPlayer();
+
+    state.animId = requestAnimationFrame(tick);
+  }
+
+  function startGame() {
+    if (state.gameStarted) return;
+    state.gameStarted = true;
+    state.score = 0;
+    state.lives = 3;
+    state.stage = 1;
+    state.bullets = [];
+    spawnEnemies();
+    overlay.classList.add('hidden');
+    tick();
+  }
+
+  function setupInput() {
+    function preventTouch(e) { e.preventDefault(); }
+
+    btnLeft.addEventListener('touchstart', function (e) {
+      preventTouch(e);
+      state.moveLeft = true;
+    }, { passive: false });
+    btnLeft.addEventListener('touchend', function (e) {
+      preventTouch(e);
+      state.moveLeft = false;
+    }, { passive: false });
+    btnLeft.addEventListener('touchcancel', function () { state.moveLeft = false; });
+    btnLeft.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      state.moveLeft = true;
+    });
+    btnLeft.addEventListener('pointerup', function () { state.moveLeft = false; });
+    btnLeft.addEventListener('pointerleave', function () { state.moveLeft = false; });
+
+    btnRight.addEventListener('touchstart', function (e) {
+      preventTouch(e);
+      state.moveRight = true;
+    }, { passive: false });
+    btnRight.addEventListener('touchend', function (e) {
+      preventTouch(e);
+      state.moveRight = false;
+    }, { passive: false });
+    btnRight.addEventListener('touchcancel', function () { state.moveRight = false; });
+    btnRight.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      state.moveRight = true;
+    });
+    btnRight.addEventListener('pointerup', function () { state.moveRight = false; });
+    btnRight.addEventListener('pointerleave', function () { state.moveRight = false; });
+
+    btnFire.addEventListener('touchstart', function (e) {
+      preventTouch(e);
+      state.firePressed = true;
+    }, { passive: false });
+    btnFire.addEventListener('touchend', function (e) {
+      preventTouch(e);
+      state.firePressed = false;
+    }, { passive: false });
+    btnFire.addEventListener('touchcancel', function () { state.firePressed = false; });
+    btnFire.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      state.firePressed = true;
+    });
+    btnFire.addEventListener('pointerup', function () { state.firePressed = false; });
+    btnFire.addEventListener('pointerleave', function () { state.firePressed = false; });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.code === 'ArrowLeft') { e.preventDefault(); state.moveLeft = true; }
+      if (e.code === 'ArrowRight') { e.preventDefault(); state.moveRight = true; }
+      if (e.code === 'Space') { e.preventDefault(); state.firePressed = true; }
+    });
+    document.addEventListener('keyup', function (e) {
+      if (e.code === 'ArrowLeft') state.moveLeft = false;
+      if (e.code === 'ArrowRight') state.moveRight = false;
+      if (e.code === 'Space') state.firePressed = false;
+    });
+
+    overlay.addEventListener('click', startGame);
+    overlay.addEventListener('touchend', function (e) {
+      e.preventDefault();
+      startGame();
+    }, { passive: false });
+  }
+
+  elBest.textContent = state.best;
+  setupInput();
+})();
+    </script>
+  </body>
+</html>
+
